@@ -1,0 +1,6 @@
+.idea
+.vscode
+
+.docker_volumes
+
+.env

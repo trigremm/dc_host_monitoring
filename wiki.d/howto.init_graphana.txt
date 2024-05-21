@@ -1,0 +1,2 @@
+dashboard -> new -> import -> 1860
+add sourece -> http://prometheus:9090
