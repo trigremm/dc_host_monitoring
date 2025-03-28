@@ -14,6 +14,7 @@ services:
       - ./.docker_volumes/prometheus/data:/prometheus
     ports:
       - "9090:9090"
+    restart: unless-stopped
 
   grafana:
     container_name: hm-grafana
@@ -28,6 +29,7 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    restart: unless-stopped
 
   node:
     container_name: hm-node
@@ -38,6 +40,7 @@ services:
       - "9100:9100"
     volumes:
       - /:/host:ro
+    restart: unless-stopped
 
   cadvisor:
     container_name: hm-cadvisor
@@ -52,6 +55,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     depends_on:
       - prometheus
+    restart: unless-stopped
 
   loki:
     container_name: hm-loki
@@ -60,7 +64,9 @@ services:
       - "3100:3100"
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./.docker_volumes/loki/data:/loki # Persistent storage for Loki data
     command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
 
   promtail:
     container_name: hm-promtail
@@ -71,3 +77,4 @@ services:
     command: -config.file=/etc/promtail/config.yaml
     depends_on:
       - loki
+    restart: unless-stopped
