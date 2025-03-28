@@ -81,6 +81,7 @@ services:
       - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
       - ./.docker/loki/data:/loki
       - ./.docker/loki/wal:/wal # Add explicit volume for WAL directory
+      - ./.docker/loki/compactor:/loki/compactor # Add explicit volume for compactor
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     restart: unless-stopped
 
