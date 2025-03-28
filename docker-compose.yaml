@@ -1,48 +1,73 @@
+name: host-monitoring
+
 services:
   prometheus:
+    container_name: hm-prometheus
     build:
       context: .
-      dockerfile: Dockerfile.prometheus
-    container_name: prometheus
-    volumes:
-      - prometheus_data:/prometheus
+      dockerfile_inline: |
+        FROM prom/prometheus:latest
+        COPY ./prometheus/prometheus.yml /etc/prometheus/
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./.docker_volumes/prometheus/data:/prometheus
     ports:
       - "9090:9090"
-    networks:
-      - monitoring
 
   grafana:
+    container_name: hm-grafana
     image: grafana/grafana:latest
-    container_name: grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-    ports:
-      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./.docker_volumes/grafana/data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
     depends_on:
       - prometheus
-    networks:
-      - monitoring
 
   node:
+    container_name: hm-node
     image: prom/node-exporter:latest
-    container_name: node
+    command:
+      - "--path.rootfs=/host"
     ports:
       - "9100:9100"
-    command:
-      - '--path.rootfs=/host'
     volumes:
-      - /:/host:ro,rslave
-    networks:
-      - monitoring
+      - /:/host:ro
 
-networks:
-  monitoring:
+  cadvisor:
+    container_name: hm-cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "9080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    depends_on:
+      - prometheus
 
-volumes:
-  prometheus_data:
-  grafana_data:
+  loki:
+    container_name: hm-loki
+    image: grafana/loki:2.8.2
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    container_name: hm-promtail
+    image: grafana/promtail:2.8.2
+    volumes:
+      - /var/log:/var/log:ro
+      - ./promtail/promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki

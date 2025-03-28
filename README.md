@@ -1,8 +1,8 @@
 # Dc Oraclus Host Monitor
 
-see wiki.d/howto.txt 
+see wiki.d/howto.txt
 
-clone project to server 
+clone project to server
 run project
 
 use ssh-tunnel to connect to ui

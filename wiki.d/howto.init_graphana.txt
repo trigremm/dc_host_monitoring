@@ -1,2 +1,8 @@
-dashboard -> new -> import -> 1860
-add sourece -> http://prometheus:9090
+mkdir -p ./.docker/grafana/data
+sudo chown -R 472:472 ./.docker/grafana/data
+mkdir -p ./.docker/prometheus/data
+sudo chown -R 65534:65534 ./.docker/prometheus/data
+
+
+dashboard -> new -> import -> 1860, 20825, 11277
+add source -> http://prometheus:9090
