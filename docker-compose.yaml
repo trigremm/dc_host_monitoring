@@ -74,11 +74,13 @@ services:
   loki:
     container_name: hm-loki
     image: grafana/loki:2.8.2
+    user: root # Run as root to ensure write permissions
     ports:
       - "3100:3100"
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
       - ./.docker/loki/data:/loki
+      - ./.docker/loki/wal:/wal # Add explicit volume for WAL directory
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     restart: unless-stopped
 

@@ -12,7 +12,6 @@ ingester:
         store: inmemory
       replication_factor: 1
   # Removed 'final_sleep' field which was causing parse errors
-  # final_sleep: 0s
 
 schema_config:
   configs:
@@ -43,3 +42,9 @@ chunk_store_config:
 table_manager:
   retention_deletes_enabled: false
   retention_period: 0s
+
+# Explicitly disable compactor to prevent errors
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: false

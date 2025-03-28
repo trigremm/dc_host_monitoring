@@ -23,6 +23,10 @@ up:
 	chmod 777 .docker/grafana/data
 	mkdir -p .docker/loki/data
 	chmod 777 .docker/loki/data
+	mkdir -p .docker/loki/wal
+	chmod 777 .docker/loki/wal
+	mkdir -p .docker/loki/compactor
+	chmod 777 .docker/loki/compactor
 	# start services
 	docker compose up -d --no-build
 
