@@ -8,13 +8,21 @@ services:
       dockerfile_inline: |
         FROM prom/prometheus:latest
         COPY ./prometheus/prometheus.yml /etc/prometheus/
+        USER root
+        RUN mkdir -p /prometheus && \
+            chown -R nobody:nobody /prometheus
+        USER nobody
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
     volumes:
-      - ./.docker_volumes/prometheus/data:/prometheus
+      - ./.docker/prometheus/data:/prometheus
     ports:
       - "9090:9090"
     restart: unless-stopped
+    user: nobody:nobody
 
   grafana:
     container_name: hm-grafana
@@ -23,13 +31,14 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - ./.docker_volumes/grafana/data:/var/lib/grafana
+      - ./.docker/grafana/data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
     restart: unless-stopped
+    user: "472" # Grafana's official user ID
 
   node:
     container_name: hm-node
@@ -56,6 +65,11 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   loki:
     container_name: hm-loki
@@ -64,8 +78,8 @@ services:
       - "3100:3100"
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
-      - ./.docker_volumes/loki/data:/loki # Persistent storage for Loki data
-    command: -config.file=/etc/loki/local-config.yaml
+      - ./.docker/loki/data:/loki
+    command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     restart: unless-stopped
 
   promtail:

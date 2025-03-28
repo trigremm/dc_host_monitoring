@@ -11,7 +11,8 @@ ingester:
       kvstore:
         store: inmemory
       replication_factor: 1
-  final_sleep: 0s
+  # Removed 'final_sleep' field which was causing parse errors
+  # final_sleep: 0s
 
 schema_config:
   configs:

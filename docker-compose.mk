@@ -16,13 +16,13 @@ build:
 	docker compose build
 
 up:
-	# prepare directories
-	mkdir -p .docker_volumes/prometheus
-	chmod 777 .docker_volumes/prometheus
-	mkdir -p .docker_volumes/grafana
-	chmod 777 .docker_volumes/grafana
-	mkdir -p .docker_volumes/loki/data
-	chmod 777 .docker_volumes/loki/data
+	# prepare directories with proper permissions
+	mkdir -p .docker/prometheus/data
+	chmod 777 .docker/prometheus/data
+	mkdir -p .docker/grafana/data
+	chmod 777 .docker/grafana/data
+	mkdir -p .docker/loki/data
+	chmod 777 .docker/loki/data
 	# start services
 	docker compose up -d --no-build
 
